@@ -1,0 +1,68 @@
+# ------------------------
+# 397. Integer Replacement
+# ------------------------
+
+# Problem: https://leetcode.com/problems/integer-replacement
+#
+# Given a positive integer n, you can apply one of the following operations:
+#         
+#   1. If n is even, replace n with n / 2.
+#   2. If n is odd, replace n with either n + 1 or n - 1.
+# 
+# Return the minimum number of operations needed for n to become 1.
+# 
+# Example 1:
+# 
+# Input: n = 8
+# Output: 3
+# 
+# Explanation: 8 -> 4 -> 2 -> 1
+# 
+# Example 2:
+# 
+# Input: n = 7
+# Output: 4
+# 
+# Explanation: 7 -> 8 -> 4 -> 2 -> 1
+# or 7 -> 6 -> 3 -> 2 -> 1
+# 
+# Example 3:
+# 
+# Input: n = 4
+# Output: 2
+# 
+# 
+# Constraints:
+#         1 <= n <= 2³¹ - 1
+
+
+# Solution: https://leetcode.com/problems/integer-replacement/solutions/377253/easy-peasy-python-comments-bit-manipulation
+# Credit: https://leetcode.com/u/lostworld21/
+def integer_replacement(n):
+    cnt = 0
+    while n != 1:
+        if n % 2 == 0:
+            n = n //2
+        elif n % 4 == 1 or n == 3:
+            n -= 1
+        else:
+            n += 1
+        cnt += 1
+    
+    return cnt
+    # Time: O(log(n))
+    # Space: O(1)
+
+
+def main():
+    result = integer_replacement(8)
+    print(result) # 3
+
+    result = integer_replacement(7)
+    print(result) # 4
+
+    result = integer_replacement(4)
+    print(result) # 2
+
+if __name__ == "__main__":
+    main()

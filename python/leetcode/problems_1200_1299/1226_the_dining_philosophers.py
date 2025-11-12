@@ -1,0 +1,136 @@
+# --------------------------------
+# 1226. The Dining Philosophers 🍽️
+# --------------------------------
+
+# Problem: https://leetcode.com/problems/the-dining-philosophers
+#
+# Five silent philosophers sit at a round table with bowls of spaghetti. Forks are
+# placed between each pair of adjacent philosophers.
+# 
+# Each philosopher must alternately think and eat. However, a philosopher can only
+# eat spaghetti when they have both left and right forks. Each fork can be held by
+# only one philosopher and so a philosopher can use the fork only if it is not
+# being used by another philosopher. After an individual philosopher finishes
+# eating, they need to put down both forks so that the forks become available to
+# others. A philosopher can take the fork on their right or the one on their left
+# as they become available, but cannot start eating before getting both forks.
+# 
+# Eating is not limited by the remaining amounts of spaghetti or stomach space; an
+# infinite supply and an infinite demand are assumed.
+# 
+# Design a discipline of behaviour (a concurrent algorithm) such that no
+# philosopher will starve; i.e., each can forever continue to alternate between
+# eating and thinking, assuming that no philosopher can know when others may want
+# to eat or think.
+# 
+# https://assets.leetcode.com/uploads/2019/09/24/an_illustration_of_the_dining_philosophers_problem.png
+# 
+# The problem statement and the image above are taken from wikipedia.org
+# 
+# The philosophers' ids are numbered from 0 to 4 in a clockwise order. Implement
+# the function void wantsToEat(philosopher, pickLeftFork, pickRightFork, eat,
+# putLeftFork, putRightFork) where:
+#         
+#   * philosopher is the id of the philosopher who wants to eat.
+#   * pickLeftFork and pickRightFork are functions you can call to pick the
+#     corresponding forks of that philosopher.
+#   * eat is a function you can call to let the philosopher eat once he has
+#     picked both forks.
+#   * putLeftFork and putRightFork are functions you can call to put down the
+#     corresponding forks of that philosopher.
+#   * The philosophers are assumed to be thinking as long as they are not
+#     asking to eat (the function is not being called with their number).
+# 
+# Five threads, each representing a philosopher, will simultaneously use one
+# object of your class to simulate the process. The function may be called for the
+# same philosopher more than once, even before the last call ends.
+# 
+# Example 1:
+# 
+# Input: n = 1
+# Output: [[3,2,1],[3,1,1],[3,0,3],[3,1,2],[3,2,2],[4,2,1],[4,1,1],[2,2,1],[2,1,1]
+# ,[1,2,1],[2,0,3],[2,1,2],[2,2,2],[4,0,3],[4,1,2],[4,2,2],[1,1,1],[1,0,3],[1,1,2]
+# ,[1,2,2],[0,1,1],[0,2,1],[0,0,3],[0,1,2],[0,2,2]]
+# 
+# Explanation:
+# n is the number of times each philosopher will call the function.
+# The output array describes the calls you made to the functions controlling the
+# forks and the eat function, its format is:
+# output[i] = [a, b, c] (three integers)
+# - a is the id of a philosopher.
+# - b specifies the fork: {1 : left, 2 : right}.
+# - c specifies the operation: {1 : pick, 2 : put, 3 : eat}.
+# 
+# 
+# Constraints:
+#         1 <= n <= 60
+
+
+# Solution: https://algo.monster/liteproblems/1226
+# Credit: AlgoMonster
+import threading
+from typing import Callable
+
+class DiningPhilosophers:
+    def __init__(self):
+        # Five mutexes representing five forks on the table
+        # Each philosopher sits between two forks
+        # Fork i is between philosopher i and philosopher (i+1) % 5
+        self.fork_mutexes = [threading.Lock() for _ in range(5)]
+  
+    def wantsToEat(self,
+                   philosopher: int,
+                   pickLeftFork: Callable[[], None],
+                   pickRightFork: Callable[[], None],
+                   eat: Callable[[], None],
+                   putLeftFork: Callable[[], None],
+                   putRightFork: Callable[[], None]) -> None:
+        """
+        Manages a philosopher's eating process to avoid deadlock.
+      
+        The dining philosophers problem is solved by acquiring both forks
+        (mutexes) needed by a philosopher before allowing them to eat.
+        This prevents deadlock while allowing non-adjacent philosophers
+        to eat concurrently.
+      
+        Args:
+            philosopher: The philosopher's index (0-4)
+            pickLeftFork: Function to pick up the left fork
+            pickRightFork: Function to pick up the right fork
+            eat: Function to eat
+            putLeftFork: Function to put down the left fork
+            putRightFork: Function to put down the right fork
+        """
+      
+        # Calculate the indices of the two forks needed by this philosopher
+        # Left fork: same index as philosopher
+        # Right fork: next philosopher's fork (wrapping around for philosopher 4)
+        left_fork_index = philosopher
+        right_fork_index = (philosopher + 1) % 5
+      
+        # To prevent deadlock, we need to acquire forks in a consistent order
+        # Always acquire the lower-indexed fork first
+        first_fork = min(left_fork_index, right_fork_index)
+        second_fork = max(left_fork_index, right_fork_index)
+      
+        # Acquire both mutexes in order to prevent deadlock
+        # This ensures that adjacent philosophers cannot eat simultaneously
+        # while non-adjacent philosophers can eat concurrently
+        with self.fork_mutexes[first_fork]:
+            with self.fork_mutexes[second_fork]:
+                # Critical section: perform eating actions in sequence
+                # Only execute these actions after both forks are acquired
+                pickLeftFork()
+                pickRightFork()
+                eat()
+                putLeftFork()
+                putRightFork()
+              
+        # Mutexes are automatically released when exiting the with blocks
+
+
+def main():
+    print("TO DO")
+
+if __name__ == "__main__":
+    main()
