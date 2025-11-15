@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	"math"
+	"math/big"
 	"slices"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -441,8 +443,247 @@ func circularArrayRotation(a []int32, k int32, queries []int32) []int32 {
 	return result
 }
 
-func main() {
+/*
+ * Problem: https://www.hackerrank.com/challenges/permutation-equation/problem
+ */
+func permutationEquation(p []int32) []int32 {
+	p1 := make(map[int32]int32)
+	for i, v := range p {
+		p1[v] = int32(i) + 1
+	}
+	r := make([]int32, 0, len(p))
+	for x := 1; x <= len(p); x++ {
+		px := p1[int32(x)]
+		r = append(r, p1[px])
+	}
+	return r
+}
 
+/*
+ * Problem: https://www.hackerrank.com/challenges/jumping-on-the-clouds-revisited/problem
+ */
+func jumpingOnClouds(c []int32, k int32) int32 {
+	var e int32 = 100
+	var current int32
+	n := int32(len(c))
+
+	for {
+		current = (current + k) % n
+
+		if c[current] == 1 {
+			e -= 3
+		} else {
+			e -= 1
+		}
+
+		if current == 0 {
+			break
+		}
+	}
+
+	return e
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/find-digits/problem
+ */
+func findDigits(n int32) int32 {
+	nStr := strconv.Itoa(int(n))
+	var count int32
+
+	for _, char := range nStr {
+		digit, err := strconv.Atoi(string(char))
+
+		// In a real application, you'd handle this error, but since we are guaranteed
+		// the input 'n' is an integer, this error should not occur.
+		if err != nil {
+			continue
+		}
+
+		if digit != 0 && int(n)%digit == 0 {
+			count++
+		}
+	}
+
+	return count
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/extra-long-factorials/problem
+ */
+func extraLongFactorials(n int32) {
+	r := new(big.Int)
+	r = r.MulRange(1, int64(n))
+	fmt.Print(r)
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/append-and-delete/problem
+ */
+func appendAndDelete(s string, t string, k int32) string {
+	lenS := len(s)
+	lenT := len(t)
+
+	if int(k) >= (lenS + lenT) {
+		return "Yes"
+	}
+
+	i := 0
+	for i < lenT && i < lenS {
+		if s[i] != t[i] {
+			break
+		}
+		i++
+	}
+	// 'i' is the length of the common prefix.
+	steps := lenS + lenT - 2*i
+
+	if int(k) >= steps && (int(k)-steps)%2 == 0 {
+		return "Yes"
+	}
+
+	return "No"
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/sherlock-and-squares/problem
+ */
+func squares(a int32, b int32) int32 {
+	// Calculate the largest integer whose square is <= b.
+	largestRoot := math.Floor(math.Sqrt(float64(b)))
+
+	// Calculate the smallest integer whose square is >= a.
+	smallestRoot := math.Ceil(math.Sqrt(float64(a)))
+
+	// The number of perfect squares is the difference in the roots plus 1.
+	r := 1 + largestRoot - smallestRoot
+
+	return int32(r)
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/library-fine/problem
+ */
+func libraryFine(d1 int32, m1 int32, y1 int32, d2 int32, m2 int32, y2 int32) int32 {
+	if y1 > y2 {
+		return 10000
+	}
+
+	if y1 == y2 && m1 > m2 {
+		return (m1 - m2) * 500
+	}
+
+	if y1 == y2 && m1 == m2 && d1 > d2 {
+		return (d1 - d2) * 15
+	}
+
+	return 0
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/cut-the-sticks/problem
+ */
+func cutTheSticks(arr []int32) []int32 {
+	slices.Sort(arr)
+
+	var results []int32
+	n := int32(len(arr))
+	var i int32 = 0
+
+	for i < n {
+		results = append(results, n-i)
+		currentShortest := arr[i]
+
+		j := i
+		for j < n && arr[j] == currentShortest {
+			j++
+		}
+
+		i = j
+	}
+
+	return results
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/cut-the-sticks/problem
+ */
+func nonDivisibleSubset(k int32, s []int32) int32 {
+	remainderCounts := make([]int32, k)
+	for _, val := range s {
+		remainderCounts[val%k]++
+	}
+
+	var count int32 = 0
+
+	if remainderCounts[0] > 0 {
+		count += 1
+	}
+
+	for i := 1; i <= int(k)/2; i++ {
+
+		if i*2 == int(k) {
+			if remainderCounts[i] > 0 {
+				count += 1
+			}
+		} else {
+			c1 := remainderCounts[i]
+			c2 := remainderCounts[int(k)-i]
+
+			maxCount := int32(math.Max(float64(c1), float64(c2)))
+			count += maxCount
+		}
+	}
+
+	return count
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/save-the-prisoner/problem
+ */
+func saveThePrisoner(n int32, m int32, s int32) int32 {
+	return ((s + m - 2) % n) + 1
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/repeated-string/problem
+ */
+func repeatedString(s string, n int64) int64 {
+	size := int64(len(s))
+
+	countInS := int64(strings.Count(s, "a"))
+	totalFullCount := (n / size) * countInS
+
+	remainderLen := n % size
+	remainder := s[:int(remainderLen)]
+
+	countInRemainder := int64(strings.Count(remainder, "a"))
+
+	return totalFullCount + countInRemainder
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/equality-in-a-array/problem
+ */
+func equalizeArray(arr []int32) int32 {
+	counts := make(map[int]int)
+
+	for _, val := range arr {
+		counts[int(val)]++
+	}
+
+	maxFrequency := 0
+	// Find the maximum frequency.
+	for _, count := range counts {
+		if count > maxFrequency {
+			maxFrequency = count
+		}
+	}
+
+	return int32(len(arr) - maxFrequency)
+}
+
+func main() {
 	// var grades []int32 = []int32{73, 67, 38, 33}
 	// result := gradingStudents(grades)
 	// fmt.Println(result)
@@ -526,9 +767,49 @@ func main() {
 	// result := viralAdvertising(3)
 	// fmt.Println(result)
 
-	var a []int32 = []int32{1, 2, 3}
-	var q []int32 = []int32{0, 1, 2}
-	result := circularArrayRotation(a, 2, q)
+	// var a []int32 = []int32{1, 2, 3}
+	// var q []int32 = []int32{0, 1, 2}
+	// result := circularArrayRotation(a, 2, q)
+	// fmt.Println(result)
+
+	// var p []int32 = []int32{4, 3, 5, 1, 2}
+	// result := permutationEquation(p)
+	// fmt.Println(result)
+
+	// var c []int32 = []int32{0, 0, 1, 0, 0, 1, 1, 0}
+	// result := jumpingOnClouds(c, 2)
+	// fmt.Println(result)
+
+	// result := findDigits(1012)
+	// fmt.Println(result)
+
+	// extraLongFactorials(30)
+
+	// result := appendAndDelete("hackerhappy", "hackerrank", 9)
+	// fmt.Println(result)
+
+	// result := squares(3, 9)
+	// fmt.Println(result)
+
+	// result := libraryFine(9, 6, 2015, 6, 6, 2015)
+	// fmt.Println(result)
+
+	// var arr []int32 = []int32{5, 4, 4, 2, 2, 8}
+	// result := cutTheSticks(arr)
+	// fmt.Println(result)
+
+	// var s []int32 = []int32{278, 576, 496, 727, 410, 124, 338, 149, 209, 702, 282, 718, 771, 575, 436}
+	// result := nonDivisibleSubset(7, s)
+	// fmt.Println(result)
+
+	// result := saveThePrisoner(7, 19, 2)
+	// fmt.Println(result)
+
+	// result := repeatedString("aba", int64(10))
+	// fmt.Println(result)
+
+	var arr []int32 = []int32{3, 3, 2, 1, 3}
+	result := equalizeArray(arr)
 	fmt.Println(result)
 }
 
