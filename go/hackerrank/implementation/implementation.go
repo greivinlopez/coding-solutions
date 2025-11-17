@@ -806,6 +806,148 @@ func taumBday(b int32, w int32, bc int32, wc int32, z int32) int64 {
 	return int64(b)*int64(x) + int64(w)*int64(y)
 }
 
+/*
+ * Problem: https://www.hackerrank.com/challenges/organizing-containers-of-balls/problem
+ */
+func organizingContainers(container [][]int32) string {
+	n := len(container)
+	capacity := make([]int64, n)
+	typeCount := make([]int64, n)
+
+	for i := range n {
+		var currentCapacity int64 = 0
+		var currentTypeCount int64 = 0
+
+		for j := range n {
+			currentCapacity += int64(container[i][j])
+			currentTypeCount += int64(container[j][i])
+		}
+
+		// Store the calculated sums in their respective slices.
+		capacity[i] = currentCapacity
+		typeCount[i] = currentTypeCount
+	}
+
+	slices.Sort(capacity)
+	slices.Sort(typeCount)
+
+	for i := range n {
+		if capacity[i] != typeCount[i] {
+			return "Impossible"
+		}
+	}
+
+	return "Possible"
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/encryption/problem
+ */
+func encryption(s string) string {
+	noSpaces := strings.ReplaceAll(s, " ", "")
+
+	lenStr := len(noSpaces)
+	if lenStr == 0 {
+		return ""
+	}
+
+	sqrt := math.Sqrt(float64(lenStr))
+	c := int(math.Ceil(sqrt))
+	var e strings.Builder
+
+	i := 0
+	j := 0
+
+	for range lenStr {
+		if i+j > lenStr-1 {
+			e.WriteByte(' ')
+			j++
+			i = 0
+		}
+
+		e.WriteByte(noSpaces[i+j])
+		i += c
+	}
+
+	return e.String()
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/bigger-is-greater/problem
+ */
+func biggerIsGreater(w string) string {
+	reverse := func(slice []byte) {
+		for l, r := 0, len(slice)-1; l < r; l, r = l+1, r-1 {
+			slice[l], slice[r] = slice[r], slice[l]
+		}
+	}
+
+	bytes := []byte(w)
+	n := len(bytes)
+
+	i := n - 2
+	for i >= 0 && bytes[i] >= bytes[i+1] {
+		i--
+	}
+
+	if i < 0 {
+		return "no answer"
+	}
+
+	j := n - 1
+	for bytes[j] <= bytes[i] {
+		j--
+	}
+
+	bytes[i], bytes[j] = bytes[j], bytes[i]
+	reverse(bytes[i+1:])
+
+	return string(bytes)
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/kaprekar-numbers/problem
+ */
+func kaprekarNumbers(p int32, q int32) {
+	var kaprekar []int64
+
+	for i := p; i <= q; i++ {
+		// # n = i^2
+		n := int64(i) * int64(i)
+		s := strconv.FormatInt(n, 10)
+		lenS := len(s)
+
+		mid := lenS / 2
+		lStr := s[:mid]
+		rStr := s[mid:]
+
+		var l int64
+		if lStr != "" {
+			l, _ = strconv.ParseInt(lStr, 10, 64)
+		}
+
+		var r int64
+		if rStr != "" {
+			r, _ = strconv.ParseInt(rStr, 10, 64)
+		}
+
+		if l+r == int64(i) {
+			kaprekar = append(kaprekar, int64(i))
+		}
+	}
+
+	if len(kaprekar) > 0 {
+		strVals := make([]string, len(kaprekar))
+		for idx, val := range kaprekar {
+			strVals[idx] = strconv.FormatInt(val, 10)
+		}
+
+		fmt.Println(strings.Join(strVals, " "))
+	} else {
+		fmt.Println("INVALID RANGE")
+	}
+}
+
 func main() {
 	// var grades []int32 = []int32{73, 67, 38, 33}
 	// result := gradingStudents(grades)
@@ -947,9 +1089,24 @@ func main() {
 	// result := acmTeam(topic)
 	// fmt.Println(result)
 
-	result := taumBday(27984, 1402, 619246, 615589, 247954)
-	fmt.Println(result)
+	// result := taumBday(27984, 1402, 619246, 615589, 247954)
+	// fmt.Println(result)
 
+	// container := [][]int32{
+	// 	{1, 3, 1},
+	// 	{2, 1, 2},
+	// 	{3, 3, 3},
+	// }
+	// result := organizingContainers(container)
+	// fmt.Println(result)
+
+	// result := encryption("feedthedog")
+	// fmt.Println(result)
+
+	// result := biggerIsGreater("dkhc")
+	// fmt.Println(result)
+
+	kaprekarNumbers(1, 100)
 }
 
 func checkError(err error) {
