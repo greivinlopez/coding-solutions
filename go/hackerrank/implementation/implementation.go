@@ -683,6 +683,129 @@ func equalizeArray(arr []int32) int32 {
 	return int32(len(arr) - maxFrequency)
 }
 
+/*
+ * Problem: https://www.hackerrank.com/challenges/queens-attack-2/problem
+ */
+func queensAttack(n int32, k int32, r_q int32, c_q int32, obstacles [][]int32) int32 {
+	type position struct {
+		row int32
+		col int32
+	}
+	// In Go, convention is to use camelCase for variables
+	boardSize := n
+	var result int32 = 0
+
+	// Create a map for efficient O(1) obstacle lookups.
+	obstacleMap := make(map[position]bool)
+	for _, obs := range obstacles {
+		obsRow1 := obs[0]
+		obsCol1 := obs[1]
+
+		// Apply the same conversion
+		obsRow0 := n - obsRow1
+		obsCol0 := obsCol1 - 1
+
+		obstacleMap[position{row: obsRow0, col: obsCol0}] = true
+	}
+
+	// Check all 8 directions: horizontal, vertical, and diagonal
+	for rowDirection := int32(-1); rowDirection <= 1; rowDirection++ {
+		for colDirection := int32(-1); colDirection <= 1; colDirection++ {
+
+			// Skip the case where both directions are 0 (no movement)
+			if rowDirection == 0 && colDirection == 0 {
+				continue
+			}
+
+			// Start from queen's position
+			currentRow, currentCol := n-r_q, c_q-1
+
+			// Move in the current direction until we hit a boundary or obstacle
+			for {
+				// Calculate the next position
+				nextRow := currentRow + rowDirection
+				nextCol := currentCol + colDirection
+
+				// Check for boundaries.
+				if nextRow < 0 || nextRow >= boardSize || nextCol < 0 || nextCol >= boardSize {
+					break // Hit a boundary, stop this direction
+				}
+
+				// Move one step in the current direction
+				currentRow = nextRow
+				currentCol = nextCol
+
+				// Check if there's an obstacle at this new position
+				// We check if the key exists in our map
+				if obstacleMap[position{row: currentRow, col: currentCol}] {
+					break // Found an obstacle, stop this direction
+				}
+
+				// If no boundary and no obstacle, it's a valid square
+				result++
+			}
+		}
+	}
+
+	return result
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/acm-icpc-team/problem
+ */
+func acmTeam(topic []string) []int32 {
+	n := len(topic)
+
+	// --- Edge Case Checks ---
+	// If there are no members, or no topics, return [0, 0]
+	if n == 0 {
+		return []int32{0, 0}
+	}
+	// m is the number of topics (length of the binary string)
+	// We assume all strings have the same length, as per the problem.
+	m := len(topic[0])
+	if m == 0 {
+		return []int32{0, 0}
+	}
+	// --- End Edge Case Checks ---
+
+	var maxTopics int = 0
+	var maxTopicCount int = 0
+
+	for i := 0; i < n-1; i++ {
+		for j := i + 1; j < n; j++ {
+			s1 := topic[i]
+			s2 := topic[j]
+
+			currentTopics := 0
+
+			for k := 0; k < m; k++ {
+				if s1[k] == '1' || s2[k] == '1' {
+					currentTopics++
+				}
+			}
+
+			if currentTopics > maxTopics {
+				maxTopics = currentTopics
+				maxTopicCount = 1
+			} else if currentTopics == maxTopics {
+				maxTopicCount++
+			}
+		}
+	}
+
+	return []int32{int32(maxTopics), int32(maxTopicCount)}
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/taum-and-bday/problem
+ */
+func taumBday(b int32, w int32, bc int32, wc int32, z int32) int64 {
+	x := min(bc, wc+z)
+	y := min(wc, bc+z)
+	return int64(b)*int64(x) + int64(w)*int64(y)
+}
+
 func main() {
 	// var grades []int32 = []int32{73, 67, 38, 33}
 	// result := gradingStudents(grades)
@@ -808,9 +931,25 @@ func main() {
 	// result := repeatedString("aba", int64(10))
 	// fmt.Println(result)
 
-	var arr []int32 = []int32{3, 3, 2, 1, 3}
-	result := equalizeArray(arr)
+	// var arr []int32 = []int32{3, 3, 2, 1, 3}
+	// result := equalizeArray(arr)
+	// fmt.Println(result)
+
+	// obstacles := [][]int32{
+	// 	{5, 5},
+	// 	{4, 2},
+	// 	{2, 3},
+	// }
+	// result := queensAttack(5, 3, 4, 3, obstacles)
+	// fmt.Println(result)
+
+	// var topic []string = []string{"10101", "11100", "11010", "00101"}
+	// result := acmTeam(topic)
+	// fmt.Println(result)
+
+	result := taumBday(27984, 1402, 619246, 615589, 247954)
 	fmt.Println(result)
+
 }
 
 func checkError(err error) {
