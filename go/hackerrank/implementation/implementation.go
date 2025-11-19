@@ -948,6 +948,53 @@ func kaprekarNumbers(p int32, q int32) {
 	}
 }
 
+/*
+ * Problem: https://www.hackerrank.com/challenges/beautiful-triplets/problem
+ */
+func beautifulTriplets(d int32, arr []int32) int32 {
+	var res int32 = 0
+
+	lookup := make(map[int32]struct{})
+	for _, val := range arr {
+		lookup[val] = struct{}{}
+	}
+
+	for _, val := range arr {
+		// Check if the 2nd and 3rd elements exist in our "set".
+		val2 := val + d
+		val3 := val + (d * 2)
+
+		_, ok1 := lookup[val2]
+		_, ok2 := lookup[val3]
+
+		if ok1 && ok2 {
+			res++
+		}
+	}
+
+	return res
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/minimum-distances/problem
+ */
+func minimumDistances(a []int32) int32 {
+	n := len(a)
+	minDistance := int32(n + 1)
+	for i := range n {
+		for j := i + 1; j < n; j++ {
+			if a[i] == a[j] {
+				minDistance = min(int32(j-i), minDistance)
+				break
+			}
+		}
+	}
+	if minDistance == int32(n+1) {
+		return -1
+	}
+	return minDistance
+}
+
 func main() {
 	// var grades []int32 = []int32{73, 67, 38, 33}
 	// result := gradingStudents(grades)
@@ -1106,7 +1153,15 @@ func main() {
 	// result := biggerIsGreater("dkhc")
 	// fmt.Println(result)
 
-	kaprekarNumbers(1, 100)
+	// kaprekarNumbers(1, 100)
+
+	// var arr []int32 = []int32{1, 6, 7, 7, 8, 10, 12, 13, 14, 19}
+	// result := beautifulTriplets(3, arr)
+	// fmt.Println(result)
+
+	var arr []int32 = []int32{1, 2, 3, 4, 5, 1}
+	result := minimumDistances(arr)
+	fmt.Println(result)
 }
 
 func checkError(err error) {
