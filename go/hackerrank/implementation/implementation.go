@@ -995,6 +995,245 @@ func minimumDistances(a []int32) int32 {
 	return minDistance
 }
 
+/*
+ * Problem: https://www.hackerrank.com/challenges/halloween-sale/problem
+ */
+func howManyGames(p int32, d int32, m int32, s int32) int32 {
+	if s < p {
+		return 0
+	}
+	var count int32 = 0
+
+	for s >= p {
+		s -= p
+		count++
+
+		p -= d
+		if p < m {
+			p = m
+		}
+	}
+
+	return count
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/the-time-in-words/problem
+ */
+func timeInWords(h int32, m int32) string {
+	// 1. Handle o' clock
+	if m == 0 {
+		return fmt.Sprintf("%s o' clock", numToWords(h))
+	}
+
+	var mid string
+	var inc int32
+
+	// 2. Determine "past" vs "to" and adjust minutes
+	if m > 30 {
+		mid = "to"
+		m = 60 - m
+		inc = 1
+	} else {
+		mid = "past"
+		inc = 0
+	}
+
+	// 3. Handle Quarter and Half
+	if m%15 == 0 {
+		amt := "half"
+		if m == 15 {
+			amt = "quarter"
+		}
+		return fmt.Sprintf("%s %s %s", amt, mid, numToWords(h+inc))
+	}
+
+	// 4. Handle specific minutes
+	minuteStr := "minutes"
+	if m == 1 {
+		minuteStr = "minute"
+	}
+
+	return fmt.Sprintf("%s %s %s %s", numToWords(m), minuteStr, mid, numToWords(h+inc))
+}
+
+// Helper function to convert numbers 1-29 to words
+func numToWords(n int32) string {
+	// Direct mapping for 1-19
+	switch n {
+	case 1:
+		return "one"
+	case 2:
+		return "two"
+	case 3:
+		return "three"
+	case 4:
+		return "four"
+	case 5:
+		return "five"
+	case 6:
+		return "six"
+	case 7:
+		return "seven"
+	case 8:
+		return "eight"
+	case 9:
+		return "nine"
+	case 10:
+		return "ten"
+	case 11:
+		return "eleven"
+	case 12:
+		return "twelve"
+	case 13:
+		return "thirteen"
+	case 14:
+		return "fourteen"
+	case 15:
+		return "fifteen"
+	case 16:
+		return "sixteen"
+	case 17:
+		return "seventeen"
+	case 18:
+		return "eighteen"
+	case 19:
+		return "nineteen"
+	}
+
+	// Handle 20-29
+	if n >= 20 {
+		base := "twenty"
+		if n == 20 {
+			return base
+		}
+		return base + " " + numToWords(n-20)
+	}
+
+	return ""
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/chocolate-feast/problem
+ */
+func chocolateFeast(n int32, c int32, m int32) int32 {
+	chocolates := n / c
+	wrappers := chocolates
+
+	for wrappers >= m {
+		newChocolates := wrappers / m
+		chocolates += newChocolates
+
+		wrappers = (wrappers % m) + newChocolates
+	}
+
+	return chocolates
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/service-lane/problem
+ */
+func serviceLane(width []int32, cases [][]int32) []int32 {
+	results := make([]int32, len(cases))
+
+	for k, c := range cases {
+		start := c[0]
+		end := c[1]
+
+		minVal := width[start]
+
+		for i := start + 1; i <= end; i++ {
+			if width[i] < minVal {
+				minVal = width[i]
+			}
+		}
+
+		results[k] = minVal
+	}
+
+	return results
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/lisa-workbook/problem
+ */
+func workbook(n int32, k int32, arr []int32) int32 {
+	var currentPageNo int32 = 0
+	var specialProblemCount int32 = 0
+
+	for _, totalProblemsInChapter := range arr {
+		var problemsProcessed int32 = 0
+
+		for problemsProcessed < totalProblemsInChapter {
+			currentPageNo++
+
+			problemsOnPage := k
+			remaining := totalProblemsInChapter - problemsProcessed
+			if remaining < k {
+				problemsOnPage = remaining
+			}
+
+			startOfRange := problemsProcessed + 1
+			endOfRange := problemsProcessed + problemsOnPage
+
+			if currentPageNo >= startOfRange && currentPageNo <= endOfRange {
+				specialProblemCount++
+			}
+
+			problemsProcessed += problemsOnPage
+		}
+	}
+
+	return specialProblemCount
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/flatland-space-stations/problem
+ */
+func flatlandSpaceStations(n int32, c []int32) int32 {
+	if int(n) == len(c) {
+		return 0
+	}
+
+	slices.Sort(c)
+
+	startDistance := c[0]
+	endDistance := (n - 1) - c[len(c)-1]
+
+	var midDistance int32 = 0
+	for i := 0; i < len(c)-1; i++ {
+		stationDistance := c[i+1] - c[i]
+		distance := stationDistance / 2
+
+		if distance > midDistance {
+			midDistance = distance
+		}
+	}
+
+	return max(startDistance, midDistance, endDistance)
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/fair-rations/problem
+ */
+func fairRations(B []int32) string {
+	count := 0
+	n := len(B)
+
+	for i := 0; i < n-1; i++ {
+		if B[i]%2 != 0 {
+			B[i+1] += 1
+			count += 2
+		}
+	}
+
+	if B[n-1]%2 != 0 {
+		return "NO"
+	}
+
+	return strconv.Itoa(count)
+}
+
 func main() {
 	// var grades []int32 = []int32{73, 67, 38, 33}
 	// result := gradingStudents(grades)
@@ -1159,13 +1398,28 @@ func main() {
 	// result := beautifulTriplets(3, arr)
 	// fmt.Println(result)
 
-	var arr []int32 = []int32{1, 2, 3, 4, 5, 1}
-	result := minimumDistances(arr)
-	fmt.Println(result)
-}
+	// var arr []int32 = []int32{1, 2, 3, 4, 5, 1}
+	// result := minimumDistances(arr)
+	// fmt.Println(result)
 
-func checkError(err error) {
-	if err != nil {
-		panic(err)
-	}
+	// result := howManyGames(20, 3, 6, 85)
+	// fmt.Println(result)
+
+	// result := timeInWords(5, 47)
+	// fmt.Println(result) // thirteen minutes to six
+
+	// result := chocolateFeast(10, 2, 5)
+	// fmt.Println(result)
+
+	// var arr []int32 = []int32{4, 2, 6, 1, 10}
+	// result := workbook(5, 3, arr)
+	// fmt.Println(result)
+
+	// var c []int32 = []int32{0, 4}
+	// result := flatlandSpaceStations(5, c)
+	// fmt.Println(result)
+
+	var B []int32 = []int32{2, 3, 4, 5, 6}
+	result := fairRations(B)
+	fmt.Println(result)
 }
