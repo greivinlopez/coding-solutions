@@ -1234,6 +1234,753 @@ func fairRations(B []int32) string {
 	return strconv.Itoa(count)
 }
 
+/*
+ * Problem: https://www.hackerrank.com/challenges/cavity-map/problem
+ */
+func cavityMap(grid []string) []string {
+	n := len(grid)
+	// Result slice
+	cavities := make([]string, n)
+	copy(cavities, grid)
+
+	for i := 1; i < n-1; i++ {
+		rowBytes := []byte(grid[i])
+
+		for j := 1; j < n-1; j++ {
+			d := grid[i][j]
+
+			isCavity := d > grid[i-1][j] &&
+				d > grid[i+1][j] &&
+				d > grid[i][j-1] &&
+				d > grid[i][j+1]
+
+			if isCavity {
+				rowBytes[j] = 'X'
+			}
+		}
+
+		cavities[i] = string(rowBytes)
+	}
+
+	return cavities
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/manasa-and-stones/problem
+ */
+func stones(n int32, a int32, b int32) []int32 {
+	steps := n - 1
+
+	// Optimization: If both step sizes are the same, there is only 1 possible outcome.
+	if a == b {
+		return []int32{steps * a}
+	}
+
+	// Determine which step is smaller to guarantee sorted output
+	minStep, maxStep := a, b
+	if a > b {
+		minStep, maxStep = b, a
+	}
+
+	result := make([]int32, n)
+
+	for i := int32(0); i < n; i++ {
+		currentVal := (steps-i)*minStep + i*maxStep
+		result[i] = currentVal
+	}
+
+	return result
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/the-grid-search/problem
+ */
+func gridSearch(G []string, P []string) string {
+	R := len(G)    // Rows in Grid
+	C := len(G[0]) // Columns in Grid
+	r := len(P)    // Rows in Pattern
+	c := len(P[0]) // Columns in Pattern
+
+	for i := 0; i <= R-r; i++ {
+		for j := 0; j <= C-c; j++ {
+			// Only check full pattern if first row matches
+			if G[i][j:j+c] == P[0] {
+				match := true
+
+				// Check the remaining rows of the pattern
+				for k := 1; k < r; k++ {
+					if G[i+k][j:j+c] != P[k] {
+						match = false
+						break
+					}
+				}
+
+				if match {
+					return "YES"
+				}
+			}
+		}
+	}
+
+	return "NO"
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/happy-ladybugs/problem
+ */
+func happyLadybugs(b string) string {
+	var counts [26]int
+	hasUnderscore := false
+
+	// Count frequencies
+	for _, r := range b {
+		if r == '_' {
+			hasUnderscore = true
+		} else {
+			counts[r-'A']++
+		}
+	}
+
+	// Check for "Lonely Bugs"
+	for _, count := range counts {
+		if count == 1 {
+			return "NO"
+		}
+	}
+
+	// Rearrange the bugs to be happy
+	if hasUnderscore {
+		return "YES"
+	}
+
+	// Edge Case: No empty space.
+	n := len(b)
+	for i := range n {
+		hasLeftNeighbor := i > 0 && b[i] == b[i-1]
+		hasRightNeighbor := i < n-1 && b[i] == b[i+1]
+
+		if !hasLeftNeighbor && !hasRightNeighbor {
+			return "NO"
+		}
+	}
+
+	return "YES"
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/strange-code/problem
+ */
+func strangeCounter(t int64) int64 {
+	var cycle int64 = 3
+
+	for t > cycle {
+		t -= cycle
+		cycle *= 2
+	}
+
+	return cycle - t + 1
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/3d-surface-area/problem
+ */
+func surfaceArea(A [][]int32) int32 {
+	H := len(A)
+	W := len(A[0])
+	totalArea := int32(2 * H * W)
+
+	// Iterate through every cell
+	for i := range H {
+		for j := range W {
+			// Get current height
+			current := A[i][j]
+
+			// --- Check West Neighbor (j-1) ---
+			var west int32 = 0
+			if j > 0 {
+				west = A[i][j-1]
+			}
+			if current > west {
+				totalArea += (current - west)
+			}
+
+			// --- Check East Neighbor (j+1) ---
+			var east int32 = 0
+			if j < W-1 {
+				east = A[i][j+1]
+			}
+			if current > east {
+				totalArea += (current - east)
+			}
+
+			// --- Check North Neighbor (i-1) ---
+			var north int32 = 0
+			if i > 0 {
+				north = A[i-1][j]
+			}
+			if current > north {
+				totalArea += (current - north)
+			}
+
+			// --- Check South Neighbor (i+1) ---
+			var south int32 = 0
+			if i < H-1 {
+				south = A[i+1][j]
+			}
+			if current > south {
+				totalArea += (current - south)
+			}
+		}
+	}
+
+	return totalArea
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/3d-surface-area/problem
+ */
+func absolutePermutation(n int32, k int32) []int32 {
+	// If k is 0, the permutation is just the identity sequence 1..n
+	if k == 0 {
+		result := make([]int32, n)
+		for i := range n {
+			result[i] = int32(i) + 1
+		}
+		return result
+	}
+
+	// If n is not divisible by 2*k, no absolute permutation exists.
+	if n%(2*k) != 0 {
+		return []int32{-1}
+	}
+
+	result := make([]int32, n)
+	for i := range n {
+		blockIndex := i / k
+		currentVal := i + 1
+
+		if blockIndex%2 == 0 {
+			result[i] = currentVal + k
+		} else {
+			result[i] = currentVal - k
+		}
+	}
+
+	return result
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/bomber-man/problem
+ */
+func bomberMan(n int32, grid []string) []string {
+	// At t=1, nothing happens.
+	if n == 1 {
+		return grid
+	}
+
+	// Helper to generate a grid full of 'O'
+	generateFullGrid := func(r, c int) []string {
+		rowStr := strings.Repeat("O", c)
+		grid := make([]string, r)
+		for i := range r {
+			grid[i] = rowStr
+		}
+		return grid
+	}
+	// At even seconds (2, 4, 6...), the grid is always full of bombs.
+	if n%2 == 0 {
+		return generateFullGrid(len(grid), len(grid[0]))
+	}
+
+	// Odd seconds > 1.
+	// The pattern oscillates between two states.
+	// Simulate the first explosion (corresponds to t=3, 7, 11...)
+	stateA := detonate(grid)
+	if n%4 == 3 {
+		return stateA
+	}
+
+	// Simulate the second explosion (corresponds to t=5, 9, 13...)
+	// We detonate 'stateA' to get 'stateB'
+	stateB := detonate(stateA)
+	return stateB
+}
+
+// detonate takes a grid layout and returns the state AFTER the bombs in it explode.
+func detonate(input []string) []string {
+	rows := len(input)
+	cols := len(input[0])
+
+	result := make([][]byte, rows)
+	for i := range result {
+		result[i] = make([]byte, cols)
+		for j := range result[i] {
+			result[i][j] = 'O'
+		}
+	}
+
+	for r := range rows {
+		for c := range cols {
+			if input[r][c] == 'O' {
+				// The bomb explodes: Clear the center
+				result[r][c] = '.'
+
+				// Clear Up
+				if r > 0 {
+					result[r-1][c] = '.'
+				}
+				// Clear Down
+				if r < rows-1 {
+					result[r+1][c] = '.'
+				}
+				// Clear Left
+				if c > 0 {
+					result[r][c-1] = '.'
+				}
+				// Clear Right
+				if c < cols-1 {
+					result[r][c+1] = '.'
+				}
+			}
+		}
+	}
+
+	finalGrid := make([]string, rows)
+	for i := range rows {
+		finalGrid[i] = string(result[i])
+	}
+	return finalGrid
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/two-pluses/problem
+ */
+func twoPluses(grid []string) int32 {
+	rows := len(grid)
+	cols := len(grid[0])
+
+	var candidates []Plus
+
+	// helper function to calculate the area of a Plus
+	area := func(p Plus) int32 {
+		return int32(4*p.radius + 1)
+	}
+
+	for r := range rows {
+		for c := range cols {
+			if grid[r][c] == 'B' {
+				continue
+			}
+
+			maxRadius := 0
+			for dist := 1; ; dist++ {
+				if r-dist >= 0 && grid[r-dist][c] == 'G' && // Up
+					r+dist < rows && grid[r+dist][c] == 'G' && // Down
+					c-dist >= 0 && grid[r][c-dist] == 'G' && // Left
+					c+dist < cols && grid[r][c+dist] == 'G' { // Right
+					maxRadius = dist
+				} else {
+					break // Hit a boundary or a 'B'
+				}
+			}
+
+			for i := 0; i <= maxRadius; i++ {
+				candidates = append(candidates, Plus{r, c, i})
+			}
+		}
+	}
+
+	var maxProduct int32 = 0
+	n := len(candidates)
+
+	for i := range n {
+		for j := i + 1; j < n; j++ {
+			p1 := candidates[i]
+			p2 := candidates[j]
+
+			if area(p1)*area(p2) <= maxProduct {
+				continue
+			}
+
+			if !overlaps(p1, p2) {
+				maxProduct = area(p1) * area(p2)
+			}
+		}
+	}
+
+	return maxProduct
+}
+
+// Plus represents a valid plus shape on the grid
+type Plus struct {
+	r, c   int // Center coordinates
+	radius int // Length of the arms (0 means just the center)
+}
+
+// overlaps checks if two Plus shapes share any cells
+func overlaps(p1, p2 Plus) bool {
+	// A helper to generate the set of points for a plus would be slow.
+	// Instead, we iterate the cells of p1 and check if they exist inside p2.
+
+	// Helper closure to check if a specific point (r,c) is inside p2
+	inP2 := func(r, c int) bool {
+		// Does (r,c) fall on the vertical arm of p2?
+		if c == p2.c && r >= p2.r-p2.radius && r <= p2.r+p2.radius {
+			return true
+		}
+		// Does (r,c) fall on the horizontal arm of p2?
+		if r == p2.r && c >= p2.c-p2.radius && c <= p2.c+p2.radius {
+			return true
+		}
+		return false
+	}
+
+	// Check p1 center
+	if inP2(p1.r, p1.c) {
+		return true
+	}
+
+	// Check p1 arms
+	for i := 1; i <= p1.radius; i++ {
+		if inP2(p1.r-i, p1.c) {
+			return true
+		} // Up
+		if inP2(p1.r+i, p1.c) {
+			return true
+		} // Down
+		if inP2(p1.r, p1.c-i) {
+			return true
+		} // Left
+		if inP2(p1.r, p1.c+i) {
+			return true
+		} // Right
+	}
+
+	return false
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/larrys-array/problem
+ */
+func larrysArray(A []int32) string {
+	inversions := 0
+	n := len(A)
+
+	for i := range n {
+		for j := i + 1; j < n; j++ {
+			if A[i] > A[j] {
+				inversions++
+			}
+		}
+	}
+
+	if inversions%2 == 0 {
+		return "YES"
+	}
+	return "NO"
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/almost-sorted/problem
+ */
+func almostSorted(arr []int32) {
+	n := len(arr)
+
+	sortedArr := make([]int32, n)
+	copy(sortedArr, arr)
+	slices.Sort(sortedArr)
+
+	// Find all indices where the current array differs
+	// from the sorted version
+	var mismatches []int
+	for i := range n {
+		if arr[i] != sortedArr[i] {
+			mismatches = append(mismatches, i)
+		}
+	}
+
+	// Already sorted
+	if len(mismatches) == 0 {
+		fmt.Println("yes")
+		return
+	}
+
+	// Define the bounds of the unsorted segment
+	l := mismatches[0]
+	r := mismatches[len(mismatches)-1]
+
+	// Check for Swap
+	if len(mismatches) == 2 {
+		if arr[l] == sortedArr[r] && arr[r] == sortedArr[l] {
+			fmt.Println("yes")
+			fmt.Printf("swap %d %d\n", l+1, r+1) // 1-based indexing
+			return
+		}
+	}
+
+	// Check for Reverse
+	isReverse := true
+	for i := 0; i <= r-l; i++ {
+		if arr[l+i] != sortedArr[r-i] {
+			isReverse = false
+			break
+		}
+	}
+
+	if isReverse {
+		fmt.Println("yes")
+		fmt.Printf("reverse %d %d\n", l+1, r+1) // 1-based indexing
+		return
+	}
+
+	// Impossible
+	fmt.Println("no")
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/matrix-rotation-algo/problem
+ */
+func matrixRotation(matrix [][]int32, r int32) {
+	rows := len(matrix)
+	cols := len(matrix[0])
+	layers := min(rows, cols) / 2
+
+	for layer := range layers {
+		// define the boundaries
+		top, bottom := layer, rows-1-layer
+		left, right := layer, cols-1-layer
+
+		var ring []int32
+
+		// Top Edge (Left to Right-1)
+		for j := left; j < right; j++ {
+			ring = append(ring, matrix[top][j])
+		}
+		// Right Edge (Top to Bottom-1)
+		for i := top; i < bottom; i++ {
+			ring = append(ring, matrix[i][right])
+		}
+		// Bottom Edge (Right to Left+1)
+		for j := right; j > left; j-- {
+			ring = append(ring, matrix[bottom][j])
+		}
+		// Left Edge (Bottom to Top+1)
+		for i := bottom; i > top; i-- {
+			ring = append(ring, matrix[i][left])
+		}
+
+		perimeter := len(ring)
+		rotation := int(r) % perimeter
+		idx := rotation
+
+		// Top Edge
+		for j := left; j < right; j++ {
+			matrix[top][j] = ring[idx]
+			idx = (idx + 1) % perimeter
+		}
+		// Right Edge
+		for i := top; i < bottom; i++ {
+			matrix[i][right] = ring[idx]
+			idx = (idx + 1) % perimeter
+		}
+		// Bottom Edge
+		for j := right; j > left; j-- {
+			matrix[bottom][j] = ring[idx]
+			idx = (idx + 1) % perimeter
+		}
+		// Left Edge
+		for i := bottom; i > top; i-- {
+			matrix[i][left] = ring[idx]
+			idx = (idx + 1) % perimeter
+		}
+	}
+
+	// Print the modified matrix
+	for i := range rows {
+		for j := range cols {
+			fmt.Printf("%d", matrix[i][j])
+			if j < cols-1 {
+				fmt.Print(" ")
+			}
+		}
+		fmt.Println()
+	}
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/ashton-and-string/problem
+ */
+func ashtonString(s string, k int32) string {
+	n := len(s)
+	sa := buildSuffixArray(s)
+	lcp := buildLCP(s, sa)
+
+	// We must use int64 for K because K can decrease, and the math involves large numbers.
+	// Although the input says int32, HackerRank inputs for this problem can exceed 2^31-1.
+	k64 := int64(k)
+
+	for i := range n {
+		suffixIdx := sa[i]
+		suffixLen := int64(n - suffixIdx)
+		prevLCP := int64(lcp[i])
+
+		// Number of new distinct substrings contributed by this suffix
+		count := suffixLen - prevLCP
+
+		if count <= 0 {
+			continue
+		}
+
+		// Calculate total characters added by this batch.
+		// Formula: (First + Last) * Count / 2
+		firstLen := prevLCP + 1
+		lastLen := suffixLen
+
+		// MUST do this math in int64 to prevent overflow
+		totalChars := (firstLen + lastLen) * count / 2
+
+		if k64 <= totalChars {
+			// The character is within this bucket
+			for length := firstLen; length <= lastLen; length++ {
+				if k64 <= length {
+					// Found the exact character
+					// string index = start of suffix + (k - 1)
+					return string(s[int64(suffixIdx)+k64-1])
+				}
+				k64 -= length
+			}
+		} else {
+			// Skip this batch
+			k64 -= totalChars
+		}
+	}
+
+	return ""
+}
+
+// buildSuffixArray constructs the suffix array in O(N log^2 N) using doubling
+func buildSuffixArray(s string) []int {
+	n := len(s)
+	sa := make([]int, n)
+	rank := make([]int, n)
+	newRank := make([]int, n)
+
+	for i := range n {
+		sa[i] = i
+		rank[i] = int(s[i])
+	}
+
+	k := 1
+	// Closure for comparing two suffixes based on current 'k'
+	compare := func(i, j int) bool {
+		if rank[i] != rank[j] {
+			return rank[i] < rank[j]
+		}
+		ri, rj := -1, -1
+		if i+k < n {
+			ri = rank[i+k]
+		}
+		if j+k < n {
+			rj = rank[j+k]
+		}
+		return ri < rj
+	}
+
+	for k < n {
+		sort.Slice(sa, func(i, j int) bool {
+			return compare(sa[i], sa[j])
+		})
+
+		newRank[sa[0]] = 0
+		for i := 1; i < n; i++ {
+			if compare(sa[i-1], sa[i]) {
+				newRank[sa[i]] = newRank[sa[i-1]] + 1
+			} else {
+				newRank[sa[i]] = newRank[sa[i-1]]
+			}
+		}
+		copy(rank, newRank)
+
+		if rank[sa[n-1]] == n-1 {
+			break // Optimization: Ranks are unique
+		}
+		k *= 2
+	}
+	return sa
+}
+
+// buildLCP constructs the LCP array in O(N) using Kasai's Algorithm
+func buildLCP(s string, sa []int) []int {
+	n := len(s)
+	rank := make([]int, n)
+	for i := range n {
+		rank[sa[i]] = i
+	}
+
+	lcp := make([]int, n)
+	h := 0
+	for i := range n {
+		if rank[i] > 0 {
+			j := sa[rank[i]-1] // Predecessor in Suffix Array
+			for i+h < n && j+h < n && s[i+h] == s[j+h] {
+				h++
+			}
+			lcp[rank[i]] = h
+			if h > 0 {
+				h--
+			}
+		}
+	}
+	return lcp
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/string-similarity/problem
+ */
+func stringSimilarity(s string) int64 {
+	n := len(s)
+	if n == 0 {
+		return 0
+	}
+	var totalSimilarity int64 = int64(n)
+
+	// Z-Algorithm to fill the Z-array
+	z := make([]int, n)
+
+	// [L, R] defines the interval of the match found so far
+	// that extends furthest to the right.
+	l, r := 0, 0
+
+	for i := 1; i < n; i++ {
+		// We are inside the current Z-box
+		if i <= r {
+			k := i - l
+			if z[k] < r-i+1 {
+				z[i] = z[k]
+			} else {
+				z[i] = r - i + 1
+			}
+		}
+
+		// Naive extension
+		// Try to extend the match as far as possible
+		for i+z[i] < n && s[z[i]] == s[i+z[i]] {
+			z[i]++
+		}
+
+		// Update the Z-box if we extended past the current Right boundary
+		if i+z[i]-1 > r {
+			l = i
+			r = i + z[i] - 1
+		}
+
+		// Add the calculated similarity to the total
+		totalSimilarity += int64(z[i])
+	}
+
+	return totalSimilarity
+}
+
 func main() {
 	// var grades []int32 = []int32{73, 67, 38, 33}
 	// result := gradingStudents(grades)
@@ -1419,7 +2166,65 @@ func main() {
 	// result := flatlandSpaceStations(5, c)
 	// fmt.Println(result)
 
-	var B []int32 = []int32{2, 3, 4, 5, 6}
-	result := fairRations(B)
+	// var B []int32 = []int32{2, 3, 4, 5, 6}
+	// result := fairRations(B)
+	// fmt.Println(result)
+
+	// var grid []string = []string{"1112", "1912", "1892", "1234"}
+	// result := cavityMap(grid)
+	// fmt.Println(result)
+
+	// result := stones(4, 10, 100)
+	// fmt.Println(result)
+
+	// var G []string = []string{"1234567890", "0987654321", "1111111111", "1111111111", "2222222222"}
+	// var P []string = []string{"876543", "111111", "111111"}
+	// result := gridSearch(G, P)
+	// fmt.Println(result)
+
+	// result := happyLadybugs("X_Y__X")
+	// fmt.Println(result)
+
+	// result := strangeCounter(6)
+	// fmt.Println(result)
+
+	// A := [][]int32{
+	// 	{1, 3, 4},
+	// 	{2, 2, 3},
+	// 	{1, 2, 4},
+	// }
+	// result := surfaceArea(A)
+	// fmt.Println(result)
+
+	// result := absolutePermutation(3, 0)
+	// fmt.Println(result)
+
+	// var grid []string = []string{".......", "...O...", "....O..", ".......", "OO.....", "OO....."}
+	// result := bomberMan(3, grid)
+	// fmt.Println(result)
+
+	// var grid []string = []string{"GGGGGG", "GBBBGB", "GGGGGG", "GGBBGB", "GGGGGG"}
+	// result := twoPluses(grid)
+	// fmt.Println(result)
+
+	// var A []int32 = []int32{1, 2, 3, 5, 4}
+	// result := larrysArray(A)
+	// fmt.Println(result)
+
+	// var arr []int32 = []int32{4, 2}
+	// almostSorted(arr)
+
+	// matrix := [][]int32{
+	// 	{1, 2, 3, 4},
+	// 	{5, 6, 7, 8},
+	// 	{9, 10, 11, 12},
+	// 	{13, 14, 15, 16},
+	// }
+	// matrixRotation(matrix, 2)
+
+	// result := ashtonString("dbac", 3)
+	// fmt.Println(result)
+
+	result := stringSimilarity("ababaa")
 	fmt.Println(result)
 }
