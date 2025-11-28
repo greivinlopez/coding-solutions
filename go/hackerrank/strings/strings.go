@@ -363,6 +363,91 @@ func gemstones(arr []string) int32 {
 	return int32(gems)
 }
 
+/*
+ * Problem: https://www.hackerrank.com/challenges/alternating-characters/problem
+ */
+func alternatingCharacters(s string) int32 {
+	var deletions int32
+
+	for i := 0; i < len(s)-1; i++ {
+		if s[i] == s[i+1] {
+			deletions++
+		}
+	}
+
+	return deletions
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/beautiful-binary-string/problem
+ */
+func beautifulBinaryString(b string) int32 {
+	return int32(strings.Count(b, "010"))
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/the-love-letter-mystery/problem
+ */
+func theLoveLetterMystery(s string) int32 {
+	count := 0
+	left := 0
+	right := len(s) - 1
+
+	for left < right {
+		diff := int(s[left]) - int(s[right])
+
+		// Get absolute value
+		if diff < 0 {
+			diff = -diff
+		}
+
+		count += diff
+
+		// Move pointers towards the center
+		left++
+		right--
+	}
+
+	return int32(count)
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/palindrome-index/problem
+ */
+func palindromeIndex(s string) int32 {
+	isPalindrome := func(s string, left, right int) bool {
+		for left < right {
+			if s[left] != s[right] {
+				return false
+			}
+			left++
+			right--
+		}
+		return true
+	}
+
+	left := 0
+	right := len(s) - 1
+
+	for left < right {
+		if s[left] != s[right] {
+			if isPalindrome(s, left+1, right) {
+				return int32(left)
+			}
+			if isPalindrome(s, left, right-1) {
+				return int32(right)
+			}
+			// Neither works, so it's not possible by removing just one char.
+			return -1
+		}
+		left++
+		right--
+	}
+
+	// If we went through the whole loop, it's already a palindrome.
+	return -1
+}
+
 func main() {
 	// Problem: camel case
 	c := camelcase("saveChangesInTheEditor")
@@ -436,11 +521,40 @@ func main() {
 
 	fmt.Println("--------------------------")
 
-	// Problem:
+	// Problem: Gemstones
 	input1 := []string{"abcdde", "baccd", "eeabg"}
 	fmt.Println(gemstones(input1))
 	input2 := []string{"aba", "bba", "aabb"}
 	fmt.Println(gemstones(input2))
+
+	fmt.Println("--------------------------")
+
+	// Problem: Alternating Characters
+	fmt.Println(alternatingCharacters("AAAA"))     // 3
+	fmt.Println(alternatingCharacters("BBBBB"))    // 4
+	fmt.Println(alternatingCharacters("ABABABAB")) // 0
+	fmt.Println(alternatingCharacters("AAABBB"))   // 4
+
+	fmt.Println("--------------------------")
+
+	// Problem: Alternating Characters
+	fmt.Println(beautifulBinaryString("0101010"))    // 2
+	fmt.Println(beautifulBinaryString("01100"))      // 0
+	fmt.Println(beautifulBinaryString("0100101010")) // 3
+
+	fmt.Println("--------------------------")
+
+	// Problem: The Love-Letter Mystery
+	fmt.Println(theLoveLetterMystery("abc"))   // 2
+	fmt.Println(theLoveLetterMystery("abcba")) // 0
+	fmt.Println(theLoveLetterMystery("abcd"))  // 4
+
+	fmt.Println("--------------------------")
+
+	// Problem: Palindrome Index
+	fmt.Println(palindromeIndex("aaab")) // 3
+	fmt.Println(palindromeIndex("baa"))  // 0
+	fmt.Println(palindromeIndex("bcbc")) // 0
 
 	fmt.Println("--------------------------")
 }
