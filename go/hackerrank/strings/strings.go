@@ -448,6 +448,132 @@ func palindromeIndex(s string) int32 {
 	return -1
 }
 
+/*
+ * Problem: https://www.hackerrank.com/challenges/anagram/problem
+ */
+func anagram(s string) int32 {
+	n := len(s)
+
+	// If the length is odd, we cannot split it into two equal substrings.
+	if n%2 != 0 {
+		return -1
+	}
+
+	mid := n / 2
+
+	var counts [26]int
+
+	for i := range mid {
+		counts[s[i]-'a']++
+	}
+
+	for i := mid; i < n; i++ {
+		counts[s[i]-'a']--
+	}
+
+	changes := 0
+	for _, diff := range counts {
+		if diff > 0 {
+			changes += diff
+		}
+	}
+
+	return int32(changes)
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/making-anagrams/problem
+ */
+func makingAnagrams(s1, s2 string) int32 {
+	var counts [26]int
+
+	for _, char := range s1 {
+		counts[char-'a']++
+	}
+
+	for _, char := range s2 {
+		counts[char-'a']--
+	}
+
+	deletions := 0
+	for _, diff := range counts {
+		if diff < 0 {
+			deletions += -diff
+		} else {
+			deletions += diff
+		}
+	}
+
+	return int32(deletions)
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/game-of-thrones/problem
+ */
+func gameOfThrones(s string) string {
+	var counts [26]int
+
+	for _, char := range s {
+		if char >= 'a' && char <= 'z' {
+			counts[char-'a']++
+		}
+	}
+
+	oddCount := 0
+	for _, freq := range counts {
+		// Use bitwise check for odd numbers (freq & 1)
+		if freq&1 == 1 {
+			oddCount++
+		}
+	}
+
+	if oddCount > 1 {
+		return "NO"
+	}
+	return "YES"
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/two-strings/problem
+ */
+func twoStrings(s1, s2 string) string {
+	var seen [26]bool
+
+	for _, char := range s1 {
+		if char >= 'a' && char <= 'z' {
+			seen[char-'a'] = true
+		}
+	}
+
+	for _, char := range s2 {
+		if char >= 'a' && char <= 'z' {
+			if seen[char-'a'] {
+				return "YES"
+			}
+		}
+	}
+
+	return "NO"
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/string-construction/problem
+ */
+func stringConstruction(s string) int32 {
+	var seen [26]bool
+	uniqueCount := 0
+
+	for _, char := range s {
+		idx := char - 'a'
+		if !seen[idx] {
+			seen[idx] = true
+			uniqueCount++
+		}
+	}
+
+	return int32(uniqueCount)
+}
+
 func main() {
 	// Problem: camel case
 	c := camelcase("saveChangesInTheEditor")
@@ -555,6 +681,40 @@ func main() {
 	fmt.Println(palindromeIndex("aaab")) // 3
 	fmt.Println(palindromeIndex("baa"))  // 0
 	fmt.Println(palindromeIndex("bcbc")) // 0
+
+	fmt.Println("--------------------------")
+
+	// Problem: Anagram
+	fmt.Println(anagram("aaabbb")) // 3
+	fmt.Println(anagram("ab"))     // 1
+	fmt.Println(anagram("abc"))    // -1
+	fmt.Println(anagram("mnop"))   // 2
+
+	fmt.Println("--------------------------")
+
+	// Problem: Making Anagrams
+	fmt.Println(makingAnagrams("cde", "abc"))                                            // 4
+	fmt.Println(makingAnagrams("absdjkvuahdakejfnf", "djfladfhiawasdkjvalskufhafkjnsd")) // 17
+
+	fmt.Println("--------------------------")
+
+	// Problem: Game of Thrones - I
+	fmt.Println(gameOfThrones("aaabbbb"))           // YES
+	fmt.Println(gameOfThrones("cdefghmnopqrstuvw")) // NO
+	fmt.Println(gameOfThrones("cdcdcdcdeeeef"))     // YES
+
+	fmt.Println("--------------------------")
+
+	// Problem: Two Strings
+	fmt.Println(twoStrings("hello", "world"))    // YES
+	fmt.Println(twoStrings("hi", "world"))       // NO
+	fmt.Println(twoStrings("aardvark", "apple")) // YES
+
+	fmt.Println("--------------------------")
+
+	// Problem: String Construction
+	fmt.Println(stringConstruction("abcd")) // 4
+	fmt.Println(stringConstruction("abab")) // 2
 
 	fmt.Println("--------------------------")
 }
