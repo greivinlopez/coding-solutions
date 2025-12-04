@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"unicode"
@@ -574,6 +575,234 @@ func stringConstruction(s string) int32 {
 	return int32(uniqueCount)
 }
 
+/*
+ * Problem: https://www.hackerrank.com/challenges/sherlock-and-valid-string/problem
+ */
+func isValid(s string) string {
+	var charCounts [26]int
+	for _, char := range s {
+		if char >= 'a' && char <= 'z' {
+			charCounts[char-'a']++
+		}
+	}
+
+	// Count the frequency of those frequencies
+	freqCounts := make(map[int]int)
+	for _, count := range charCounts {
+		if count > 0 {
+			freqCounts[count]++
+		}
+	}
+
+	if len(freqCounts) == 1 {
+		return "YES"
+	}
+
+	// If there are more than 2 different frequencies, we can't fix it by removing just 1 char.
+	if len(freqCounts) > 2 {
+		return "NO"
+	}
+
+	var keys []int
+	for k := range freqCounts {
+		keys = append(keys, k)
+	}
+
+	f1, f2 := keys[0], keys[1]
+	count1, count2 := freqCounts[f1], freqCounts[f2]
+
+	// One of the frequencies is 1, and it occurs exactly once.
+	if (f1 == 1 && count1 == 1) || (f2 == 1 && count2 == 1) {
+		return "YES"
+	}
+
+	// The frequencies differ by exactly 1, and the higher frequency occurs exactly once.
+	diff := int(math.Abs(float64(f1 - f2)))
+	if diff == 1 {
+		// Find which frequency is the larger one
+		maxFreqCount := count1
+		if f2 > f1 {
+			maxFreqCount = count2
+		}
+
+		if maxFreqCount == 1 {
+			return "YES"
+		}
+	}
+
+	return "NO"
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/richie-rich/problem
+ */
+func highestValuePalindrome(s string, n int32, k int32) string {
+	chars := []byte(s)
+	length := int(n)
+	left := 0
+	right := length - 1
+
+	mismatches := make([]bool, length)
+
+	for left < right {
+		if chars[left] != chars[right] {
+			maxChar := chars[left]
+			if chars[right] > maxChar {
+				maxChar = chars[right]
+			}
+
+			chars[left] = maxChar
+			chars[right] = maxChar
+			mismatches[left] = true // Mark that we spent 1 'k' here
+			k--
+		}
+		left++
+		right--
+	}
+
+	// If k is negative, it wasn't possible to make a palindrome even with min changes
+	if k < 0 {
+		return "-1"
+	}
+
+	// Second pass: Use remaining k to maximize the value (change to '9')
+	left = 0
+	right = length - 1
+
+	for left <= right {
+		if left == right {
+			if k > 0 {
+				chars[left] = '9'
+			}
+		} else {
+			if chars[left] != '9' {
+				// If this index was a mismatch we fixed in pass 1:
+				// We already deducted 1 'k'. To make them '9', we need to change them again.
+				// This effectively costs 1 *additional* k (total 2 for this pair, but 1 already paid).
+				if mismatches[left] {
+					if k >= 1 {
+						chars[left] = '9'
+						chars[right] = '9'
+						k--
+					}
+				} else {
+					// If this pair was originally matching (not '9'):
+					// We need to change both to '9', costing 2 'k'.
+					if k >= 2 {
+						chars[left] = '9'
+						chars[right] = '9'
+						k -= 2
+					}
+				}
+			}
+		}
+		left++
+		right--
+	}
+
+	return string(chars)
+}
+
+/*
+ * Problem: https://www.hackerrank.com/challenges/maximum-palindromes/problem
+ */
+const (
+	MOD   = 1000000007
+	LIMIT = 100005 // Max length of string s is 10⁵
+)
+
+var (
+	// Precomputed factorials and modular inverse factorials
+	fact    [LIMIT]int64
+	invFact [LIMIT]int64
+	// Prefix sum array for character frequencies: freq[char][index]
+	freq [26][LIMIT]int32
+)
+
+// initialize precomputes factorials and prefix sums for the input string.
+func initialize(s string) {
+	// power calculates (base^exp) % MOD efficiently.
+	power := func(base, exp int64) int64 {
+		var res int64 = 1
+		base %= MOD
+		for exp > 0 {
+			if exp%2 == 1 {
+				res = (res * base) % MOD
+			}
+			base = (base * base) % MOD
+			exp /= 2
+		}
+		return res
+	}
+
+	n := len(s)
+
+	// Precompute Factorials and Inverse Factorials
+	fact[0] = 1
+	invFact[0] = 1
+
+	for i := 1; i <= n; i++ {
+		fact[i] = (fact[i-1] * int64(i)) % MOD
+	}
+	// Compute modular inverse of n! using Fermat's Little Theorem
+	invFact[n] = power(fact[n], MOD-2)
+	// Compute remaining inverses backwards
+	for i := n - 1; i >= 1; i-- {
+		invFact[i] = (invFact[i+1] * int64(i+1)) % MOD
+	}
+
+	// Prefix Sums for character frequencies
+	// We iterate 1-based to make range calculations easier (r - (l-1))
+	for i := range n {
+		charIndex := s[i] - 'a'
+		for c := range 26 {
+			// Copy previous value
+			freq[c][i+1] = freq[c][i]
+		}
+		freq[charIndex][i+1]++
+	}
+}
+
+func answerQuery(l, r int32) int32 {
+	var odds int32
+	var totalPairs int32
+	var denominators int64 = 1
+
+	// Iterate over all alphabets to find counts in the range [l, r]
+	for c := range 26 {
+		count := freq[c][r] - freq[c][l-1]
+
+		pairs := count / 2
+		remainder := count % 2
+
+		totalPairs += pairs
+		odds += remainder
+
+		// If we have pairs, they contribute to the denominator of the multinomial coefficient
+		if pairs > 0 {
+			denominators = (denominators * invFact[pairs]) % MOD
+		}
+	}
+
+	// Formula: (TotalPairs! / (pairA! * pairB! * ...)) * max(1, oddCounts)
+
+	// Calculate numerator: TotalPairs!
+	numerator := fact[totalPairs]
+
+	// Calculate permutations of the halves
+	permutations := (numerator * denominators) % MOD
+
+	// Multiply by the number of choices for the center character
+	// If there are no odd characters, we don't multiply (or multiply by 1)
+	centerOptions := int64(odds)
+	if centerOptions == 0 {
+		centerOptions = 1
+	}
+
+	result := (permutations * centerOptions) % MOD
+	return int32(result)
+}
+
 func main() {
 	// Problem: camel case
 	c := camelcase("saveChangesInTheEditor")
@@ -715,6 +944,19 @@ func main() {
 	// Problem: String Construction
 	fmt.Println(stringConstruction("abcd")) // 4
 	fmt.Println(stringConstruction("abab")) // 2
+
+	fmt.Println("--------------------------")
+
+	// Problem: Sherlock and the Valid String
+	fmt.Println(isValid("aabbccddeefghi"))    // NO
+	fmt.Println(isValid("abcdefghhgfedecba")) // YES
+
+	fmt.Println("--------------------------")
+
+	// Problem: Highest Value Palindrome
+	fmt.Println(highestValuePalindrome("3943", 4, 1))   // "3993"
+	fmt.Println(highestValuePalindrome("092282", 6, 3)) // "992299"
+	fmt.Println(highestValuePalindrome("0011", 4, 1))   // "-1"
 
 	fmt.Println("--------------------------")
 }
